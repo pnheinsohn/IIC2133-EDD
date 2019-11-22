@@ -1,0 +1,188 @@
+% Plantilla para documentos LaTeX para enunciados
+% Por Pedro Pablo Aste Kompen - ppaste@uc.cl
+% Licencia Creative Commons BY-NC-SA 3.0
+% http://creativecommons.org/licenses/by-nc-sa/3.0/
+
+\documentclass[12pt]{article}
+
+% Margen de 1 pulgada por lado
+\usepackage{fullpage}
+% Incluye gráficas
+\usepackage{graphicx}
+% Packages para matemáticas, por la American Mathematical Society
+\usepackage{amssymb}
+\usepackage{amsmath}
+% Desactivar hyphenation
+\usepackage[none]{hyphenat}
+% Saltar entre párrafos - sin sangrías
+\usepackage{parskip}
+% Español y UTF-8
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+% Links en el documento
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{bookmark}
+\usepackage{caption}
+\setlength{\headheight}{15.2pt}
+\setlength{\headsep}{5pt}
+\pagestyle{fancy}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Exp}[1]{\mathcal{E}_{#1}}
+\newcommand{\List}[1]{\mathcal{L}_{#1}}
+\newcommand{\EN}{\Exp{\N}}
+\newcommand{\LN}{\List{\N}}
+
+\newcommand{\comment}[1]{}
+\newcommand{\lb}{\\~\\}
+\newcommand{\eop}{_{\square}}
+\newcommand{\hsig}{\hat{\sigma}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\lra}{\leftrightarrow}
+
+% Cambiar por nombre completo + número de alumno
+\newcommand{\alumno}{Paul Heinsohn Manetti - 1562305J}
+\rhead{Informe Tarea 1 - \alumno}
+
+\begin{document}
+\thispagestyle{empty}
+% Membrete
+% PUC-ING-DCC-IIC1103
+\begin{minipage}{2.3cm}
+\includegraphics[width=2cm]{img/logo.pdf}
+\vspace{0.5cm} % Altura de la corona del logo, así el texto queda alineado verticalmente con el círculo del logo.
+\end{minipage}
+\begin{minipage}{\linewidth}
+\textsc{\raggedright \footnotesize
+Pontificia Universidad Católica de Chile \\
+Departamento de Ciencia de la Computación \\
+IIC2133 - Estructuras de Datos y Algoritmos \\}
+\end{minipage}
+
+% Titulo
+\begin{center}
+\vspace{0.5cm}
+{\huge\bf Informe Tarea 1}\\
+\vspace{0.2cm}
+\today\\
+\vspace{0.2cm}
+\footnotesize{1º semestre 2019 - Profesor Yadran Eterovic}\\
+\vspace{0.2cm}
+\footnotesize{\alumno}
+\rule{\textwidth}{0.05mm}
+\end{center}
+
+\section*{Análisis teórico}
+\hspace{5mm}
+En primer lugar, se abordará la complejidad para armar el \textit{KDTree} y luego la de generar un 
+\textit{max heap} para los vecinos más cercanos para realizar una búsqueda en nuestra estructura. 
+El \textit{KDTree} implementado se arma en base al siguiente procedimiento:
+\begin{enumerate}
+    \item QuickSort de \textit{data train} en base a la dimensión de los \textit{x}s para guardar los 
+    índices de la posición de los vectores.
+    \item QuickSort de \textit{data train} en base a la dimensión de los \textit{y}s para guardar los 
+    índices de la posición de los vectores.
+    \item Generar 4 arreglos resultantes de la separación de la mediana de 1 o 2 (acorde a la conveniencia) 
+    para que sean entregados a los hijos de la raiz.
+    \item Si el tamaño de los arreglos es mayor al deseado por hoja volver a 3, en caso contrario destinar 
+    nodo actual como nodo hoja.
+\end{enumerate}
+\hspace{5mm}
+Si bien 1 y 2 en su peor caso son de complejidad O($|$\textit{data train}$|^2$) cada uno, se tiene que para 
+su mejor caso y promedio la complejidad es bastante buena: O($|$\textit{data train}$|$), y debido al tamaño 
+(grande) del set de entrenamiento, más dificil será obtener el peor o mejor caso, por lo que se asumirá la 
+ocurrencia del caso promedio. Para 3 se tiene que la cantidad de datos a procesar disminuye a la mitad cada 
+vez hasta llegar a O($log_2(|\textit{data train}|)$) niveles de recursión aproximadamente. Por lo tanto, se 
+tiene que la complejidad total de generar el árbol es de O($|dim|\cdot|\textit{data train}|\cdot
+\log(|\textit{data train}|) + |\textit{data train}|$), lo que equivale a O($dim\cdot n\cdot\log(n)$), siendo 
+\textit{dim} la cantidad de dimensiones de los datos, en este caso 2.
+
+\newpage
+\hspace{5mm}
+Para realizar la búsqueda, se tiene que cada punto a clasificar debe generar un \textit{max heap} para 
+almacenar los \textit{k} vecinos más cercanos, en donde el nodo raíz almacena la distancia más grande de estos 
+hasta el momento, por lo que decidí dividir en 2 esta parte: llenar el \textit{heap} con elementos presentes en 
+la misma caja que el punto a clasificar y de las cercanas, y luego revisar las otras cajas aledañas que puedan 
+contener puntos más cercanos. Ambas partes requieren realizar búsqueda binaria para llegar a los nodos hojas, 
+pero la diferencia es que el primero se detiene al llenar el \textit{heap} con \textit{k} elementos, mientras 
+que la búsqueda se debe realizar revisando todo el árbol, por lo que la complejidad que aporta el primero es de 
+O($|\textit{data test}|\cdot log(k)$) mientras que el segundo, es de O($|\textit{data test}|\cdot 
+log(|\textit{data train}|)$)
+
+\hspace{5mm}
+Dado lo anterior, solo basándonos en el algoritmo \textit{KNN}, es decir, sin tomar en cuenta la construcción 
+del \textit{KDTree}, tendremos que la complejidad es 
+
+\section*{Análisis Empírico}
+\hspace{5mm}
+Los siguientes cuadros muestran diferentes valores para la cantidad de vecinos y el tamaño de 
+cada set con el fin de realizar un análisis comparativo para medir el impacto que tiene cada uno 
+en el algoritmo \textit{KNN} empleado.
+\begin{center}
+    \begin{table}[h]
+        \caption{"Tiempo ejecución con k variable"}
+        \centering
+        \begin{tabular} {| c | c | c |}
+            \hline
+            Variable & Valores Originales & Valores Nuevos \\
+            \hline \hline
+            Cantidad de Vecinos & 50 & 30  \\
+            Set de Entrenamiento & 60000 & 60000\\
+            Set de Prueba & 10000 & 10000 \\
+            \hline
+            Precisión & 0.969 & 0.970 \\
+            Tiempo Ejecución & 8.780 & 5.514 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Tiempo ejecución con set de entrenamiento variable"}
+        \centering
+        \begin{tabular} {| c | c | c |}
+            \hline
+            Variable & Valores Originales & Valores Nuevos \\
+            \hline \hline
+            Cantidad de Vecinos & 50 & 50  \\
+            Set de Entrenamiento & 60000 & 30000 \\
+            Set de Prueba & 10000 & 10000 \\
+            \hline
+            Precisión & 0.969 & 0.969 \\
+            Tiempo Ejecución & 8.780 & 8.580 \\
+            \hline
+        \end{tabular}
+    \end{table}
+\end{center}
+\newpage
+\begin{center}
+    \begin{table}[h]
+        \caption{"Tiempo ejecución con set de test variable"}
+        \centering
+        \begin{tabular} {| c | c | c |}
+            \hline
+            Variable & Valores Originales & Valores Nuevos \\
+            \hline \hline
+            Cantidad de Vecinos & 50 & 50  \\
+            Set de Entrenamiento & 60000 & 60000\\
+            Set de Prueba & 10000 & 5000 \\
+            \hline
+            Precisión & 0.969 & 0.977 \\
+            Tiempo Ejecución & 8.780 & 8.382 \\
+            \hline
+        \end{tabular}
+    \end{table}
+\end{center}
+\hspace{5mm}
+Dado lo anterior, es posible apreciar que el valor del \textit{input} menos influyente respecto al tiempo de 
+ejecución fue el del set de entrenamiento, lo que era esperado ya que la obtención de los \textit{KNN} se ve 
+poco influenciada por el tamaño de dicho set, sin embargo, lo inesperado ocurrió en la precisión obtenida, ya 
+que al eliminar la mitad de los datos uno esperaría que esta disminuyera y no se mantuviera. Esto refleja que
+la mitad de los datos son suficientes para poder clasificar bastante bien este set de prueba, es más, 
+incrementarlos levemente podría conllevar al \textit{overfitting}. También, es posible destacar que disminuir 
+la cantidad de elementos en el set de prueba no genera mucha diferencia en cuanto al tiempo, naturalmente 
+éste desciende, pero se dió el caso en que la precisión aumentó, y debido a que solo eliminé los últimos 5000 
+elementos, se puede afirmar que en los datos eliminados había un promedio de fallas más elevado que en la primera
+mitad. Por otra parte, la disminución de vecinos disminuye el tiempo mientras mantiene la precisión, lo que tiene 
+sentido, ya que el procedimiento es el mismo con los mismos datos, solo que se buscan menos elementos para llenar 
+el \textit{heap} y se realizan menos movimientos al hacer \textit{heapify}.
+\end{document}

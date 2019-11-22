@@ -1,0 +1,22 @@
+{
+    "editor.detectIndentation": true,
+    "editor.autoIndent": true,
+    "typescript.format.placeOpenBraceOnNewLineForFunctions": false,
+    "typescript.format.placeOpenBraceOnNewLineForControlBlocks": false,
+    "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2, ColumnLimit: 0, PointerAlignment: Left}",
+    "files.associations": {
+        "functions.h": "c",
+        "functions.h\u0000nctions.h": "c",
+        "functions.h\u0000tions.h": "c",
+        "functions.h\u0000functions.h": "c",
+        "functions.h\u0000unctions.h": "c",
+        "pcg_basic.h": "c",
+        "pcg_basic.h\u0000cg_basic.h": "c",
+        "pcg_basic.h\u0000g_basic.h": "c",
+        "pcg_basic.h\u0000pcg_basic.h": "c",
+        "board.h": "c",
+        "watcher.h": "c",
+        "watcher.h\u0000watcher.h": "c",
+        "stdlib.h": "c"
+    },
+}

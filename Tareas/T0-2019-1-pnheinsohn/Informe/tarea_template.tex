@@ -1,0 +1,132 @@
+% Plantilla para documentos LaTeX para enunciados
+% Por Pedro Pablo Aste Kompen - ppaste@uc.cl
+% Licencia Creative Commons BY-NC-SA 3.0
+% http://creativecommons.org/licenses/by-nc-sa/3.0/
+
+\documentclass[12pt]{article}
+
+% Margen de 1 pulgada por lado
+\usepackage{fullpage}
+% Incluye gráficas
+\usepackage{graphicx}
+% Packages para matemáticas, por la American Mathematical Society
+\usepackage{amssymb}
+\usepackage{amsmath}
+% Desactivar hyphenation
+\usepackage[none]{hyphenat}
+% Saltar entre párrafos - sin sangrías
+\usepackage{parskip}
+% Español y UTF-8
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+% Links en el documento
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{bookmark}
+\setlength{\headheight}{15.2pt}
+\setlength{\headsep}{5pt}
+\pagestyle{fancy}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Exp}[1]{\mathcal{E}_{#1}}
+\newcommand{\List}[1]{\mathcal{L}_{#1}}
+\newcommand{\EN}{\Exp{\N}}
+\newcommand{\LN}{\List{\N}}
+
+\newcommand{\comment}[1]{}
+\newcommand{\lb}{\\~\\}
+\newcommand{\eop}{_{\square}}
+\newcommand{\hsig}{\hat{\sigma}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\lra}{\leftrightarrow}
+
+% Cambiar por nombre completo + número de alumno
+\newcommand{\alumno}{Paul Heinsohn Manetti - 1562305J}
+\rhead{Informe Tarea 0 - \alumno}
+
+\begin{document}
+\thispagestyle{empty}
+% Membrete
+% PUC-ING-DCC-IIC1103
+\begin{minipage}{2.3cm}
+\includegraphics[width=2cm]{img/logo.pdf}
+\vspace{0.5cm} % Altura de la corona del logo, así el texto queda alineado verticalmente con el círculo del logo.
+\end{minipage}
+\begin{minipage}{\linewidth}
+\textsc{\raggedright \footnotesize
+Pontificia Universidad Católica de Chile \\
+Departamento de Ciencia de la Computación \\
+IIC2133 - Estructuras de Datos y Algoritmos \\}
+\end{minipage}
+
+% Titulo
+\begin{center}
+\vspace{0.5cm}
+{\huge\bf Informe Tarea 0}\\
+\vspace{0.2cm}
+\today\\
+\vspace{0.2cm}
+\footnotesize{1º semestre 2019 - Profesor Yadran Eterovic}\\
+\vspace{0.2cm}
+\footnotesize{\alumno}
+\rule{\textwidth}{0.05mm}
+\end{center}
+
+\section*{Implementación}
+
+\hspace{5mm}
+Por temas de legibilidad y simplicidad de código decidí abordar la simulación mediante mi propia estructura 
+de datos. Esta consiste en una variable llamada 'table' del tipo 'Node***' que funciona como una matriz de nodos, 
+cuyas filas son del tipo 'Node**' y columnas del tipo 'Node*'. Gracias a lo anterior, pude acceder a estos. Cada 
+nodo apunta a dos variables: 'state' y 'neighbours'. La primera es un número entero (int), mientras que la 
+segunda es un puntero de punteros del mismo tipo (Node**). La idea de 'state' es almacenar el tipo de bacteria 
+presente dicho nodo, mientras que 'neighbours' para guardar los nodos vecinos.
+
+\hspace{5mm}
+Esta modelación me permite realizar una iteración en base a las filas 'i' y otra en base a las columnas 'j' 
+para acceder a los nodos mediante la sentencia 'table[i][j]', que a su vez facilita la asignación y el acceso 
+a los vecinos para realizar los cambios pertinentes.
+
+\section*{Complejidad}
+
+\hspace{5mm}
+En cuanto al algoritmo ejecutado en cada generación, tenemos que en su mejor caso se realizan $3 \cdot M 
+\cdot N$ comparaciones, ya que basta que cada nodo sea comparado con otros tres que le ganen para cambiarlo 
+de estado. En cuanto a los otros casos, es posible apreciar que realizan la misma cantidad de comparaciones 
+debido a que la probabilidad de que un nodo le gane a otro es de $1 / 3$, y como se requieren tres para 
+cambiarlo de estado, se tiene que en el caso promedio tres de cada ocho nodos van a ganarle al actual, y 
+como $8 / 3 < 3$, necesariamente se van a realizar las ocho comparaciones al igual que en el peor caso, ergo, 
+ambos realizan $8 \cdot M \cdot N$ comparaciones.
+
+\hspace{5mm}
+Es por lo anterior que el algoritmo tiene complejidad O(M$\cdot$N) en cualquier caso, lo que inicialmente uno 
+tiende a pensar que no está tan mal, sin embargo, a medida de que iba probando los tests de mayor tamaño, más 
+se demoraba la ejecución de cada generación. Entrando en detalle, es posible apreciar que el primer (test\_00), 
+cuya matriz es de 5x5, tarda en llegar a la generación de un solo tipo de bacteria (3 en adelante) en menos de 
+medio segundo, mientras que al ejecutar los últimos dos testes (test\_06 y test\_07) demoraba más de un segundo 
+por generación. \\
+
+\begin{center}
+    \begin{tabular}{| c | c | c |}
+        \multicolumn{3}{l}{Tabla 1: Complejidad en casos} \\
+        \hline
+        Caso & Comparaciones & Complejidad \\
+        \hline
+        Peor & $8 \cdot M \cdot N$ & $O(M \cdot N)$ \\
+        Promedio & $8 \cdot M \cdot N$ & $O(M \cdot N)$ \\
+        Mejor & $3 \cdot M \cdot N$ & $O(M \cdot N)$ \\
+        \hline
+    \end{tabular}
+\end{center}
+\vspace{4mm}
+\hspace{5mm}
+Lo anterior puede explicarse tanto por el algoritmo como por las estructuras empleadas. Seguramente, mi 
+algoritmo puede ser modificado para que la cantidad de comparaciones disminuya, pero creo que lo que más 
+afecta el funcionamiento de éste es el uso de estructuras, ya que mi variable 'table' podría ser solamente 
+del tipo 'int**', la cual mediante el correcto uso de punteros evita la múltiple 'instanciación' de nodos, 
+por lo que disminuirían los accesos a la memoria haciendo más fluido el transcurso de las generaciones. 
+Finalmente, me gustaría destacar que la Implementación de 'int' en vez de 'uint\_8' también influyó en el 
+desempeño del algoritmo, ya que se reservó más memoria y se terminó leyendo innecesariamente bloques que 
+no aportaban información relevante.
+
+\end{document}

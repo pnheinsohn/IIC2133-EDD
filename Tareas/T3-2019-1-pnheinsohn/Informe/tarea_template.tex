@@ -1,0 +1,343 @@
+% Plantilla para documentos LaTeX para enunciados
+% Por Pedro Pablo Aste Kompen - ppaste@uc.cl
+% Licencia Creative Commons BY-NC-SA 3.0
+% http://creativecommons.org/licenses/by-nc-sa/3.0/
+
+\documentclass[12pt]{article}
+
+% Margen de 1 pulgada por lado
+\usepackage{fullpage}
+% Incluye gráficas
+\usepackage{graphicx}
+% Packages para matemáticas, por la American Mathematical Society
+\usepackage{amssymb}
+\usepackage{amsmath}
+% Desactivar hyphenation
+\usepackage[none]{hyphenat}
+% Saltar entre párrafos - sin sangrías
+\usepackage{parskip}
+% Español y UTF-8
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+% Links en el documento
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{bookmark}
+\usepackage{caption}
+\setlength{\headheight}{15.2pt}
+\setlength{\headsep}{5pt}
+\pagestyle{fancy}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Exp}[1]{\mathcal{E}_{#1}}
+\newcommand{\List}[1]{\mathcal{L}_{#1}}
+\newcommand{\EN}{\Exp{\N}}
+\newcommand{\LN}{\List{\N}}
+
+\newcommand{\comment}[1]{}
+\newcommand{\lb}{\\~\\}
+\newcommand{\eop}{_{\square}}
+\newcommand{\hsig}{\hat{\sigma}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\lra}{\leftrightarrow}
+
+% Cambiar por nombre completo + número de alumno
+\newcommand{\alumno}{Paul Heinsohn Manetti - 1562305J}
+\rhead{Informe Tarea 3 - \alumno}
+
+\begin{document}
+\thispagestyle{empty}
+% Membrete
+% PUC-ING-DCC-IIC1103
+\begin{minipage}{2.3cm}
+\includegraphics[width=2cm]{img/logo.pdf}
+\vspace{0.5cm} % Altura de la corona del logo, así el texto queda alineado verticalmente con el círculo del logo.
+\end{minipage}
+\begin{minipage}{\linewidth}
+\textsc{\raggedright \footnotesize
+Pontificia Universidad Católica de Chile \\
+Departamento de Ciencia de la Computación \\
+IIC2133 - Estructuras de Datos y Algoritmos \\}
+\end{minipage}
+
+% Titulo
+\begin{center}
+\vspace{0.5cm}
+{\huge\bf Informe Tarea 3}\\
+\vspace{0.2cm}
+\today\\
+\vspace{0.2cm}
+\footnotesize{1º semestre 2019 - Profesor Yadran Eterovic}\\
+\vspace{0.2cm}
+\footnotesize{\alumno}
+\rule{\textwidth}{0.05mm}
+\end{center}
+
+\section*{Introducción}
+\hspace{5mm}
+En primer lugar, se mencionará una poda y una heurística para posteriormente realizar un análisis de estas en base 
+a su influencia en el desempeño del algoritmo que busca soluciones para ZHEDD. Sin embargo, antes quisiera destacar
+que no se mencionarán dos de cada una debido a que no alcancé a implementarlas en mi código para la fecha de entrega.
+
+
+\section*{Resultado \textit{Naive}}
+\hspace{5mm}
+En la sección de 'Anexos', en las tablas del 1 al 4, se muestran la cantidad de \textit{undo's} y tiempo de ejecución para
+todos los tests (1 al 30) mediante la ejecución del código \textit{naive} de \textit{backtracking}, es decir, un DFS con 
+detección de ciclos cuya complejidad es factorial en base a la cantidad de puentes.
+
+\hspace{5mm}
+A partir de estos resultados, es posible apreciar que desde el \textit{test} 13 en adelante los tiempos de ejecución
+comienzan a sobrepasar los 30 segundos a excepción del 16, es más, a partir del 22 no se encuentran soluciones en 
+menos de 4 minutos, por lo que es posible afirmar que nuestra solución \textit{naive} es ineficiente para este problema.
+
+\newpage
+
+\section*{Heurística}
+\hspace{5mm}
+La heurística aplicada consiste en la obtención de aquellos puentes que están alineados con el objetivo, debido a que 
+uno de estos contendrá un movimiento, dado el tablero, que conduzca a la solución del problema. Es por lo anterior que se
+fija un arreglo de puentes en donde los potenciales ganadores son posicionados al final de dicho arreglo, así estos serán
+los últimos en realizar un movimiento al momento de probar combinaciones de estados. Lo anterior aplica como heurística ya
+que propone una estrategia que conduce a la resolución del problema antes de que se verifiquen algunos estados cuyo último
+movimiento sean realizados por puentes que no pueden llegar al objetivo, por lo que reduce la cantidad de \textit{undo's}
+del \textit{backtracking}. Estos resultados pueden encontrarse en la sección de 'Anexos' desde la tabla 5 a la 8.
+
+\hspace{5mm}
+A partir de lo anterior, es posible apreciar que para los primeros 14 \textit{tests} no hay muchos cambios, es más, 
+en algunos casos el tiempo disminuye mientras que incrementan la cantidad de \textit{undo's}, por ejemplo los
+\textit{tests} 6 y 9, por lo que la heurística para estos casos no fue influyente. Por otra parte, si bien los
+\textit{tests} 16 y 17 disminuyen tanto la cantidad de \textit{undo's} como el tiempo de ejecución en un par de 
+segundos, y el \textit{test} 21 pasa de $\infty$ a 66 segundos, el \textit{test} 15 y particularmente el 20
+incrementan de forma notoria. Es por lo anterior que se puede concluir que dicha heurística, por sí sola, no realiza
+grandes aportes a la resolución de problemas de este tipo, es más, puede favorecer a unos y perjudicar a otros.
+
+
+\section*{Poda}
+\hspace{5mm}
+La poda aplicada consiste en dejar de expandir ramas cuando un puente que está presente en alguno de los bordes 
+del cuadrante formado por los ejes (\textit{x}, \textit{y}) de los puentes apunta fuera de éste. Esta poda es útil
+ya que permite dejar de expandir nodos con puentes cuya dirección no aporta al acortamiento de la distancia
+Manhattan entre la unión de los puentes con el objetivo. Esta poda, además, evita que el ganador apunte en la dirección
+contraria al objetivo, acortando aun más el espacio de búsqueda. Los resultados al aplicarle esta poda al
+\textit{backtracking naive} son los siguientes: Ver sección 'Anexos', tablas del 9 al 12.
+
+\hspace{5mm}
+A partir de lo anterior, es posible apreciar que en todos los \textit{tests} distintos de $\infty$ se presentan
+cambios notorios en la cantidad de \textit{undo's}, tanto es así que algunos \textit{tests} como el 13 y 15 disminuyen
+su tiempo de ejecución de forma notoria. Sin embargo, esta poda por sí sola no es lo suficientemente poderosa
+para poder llevar a aquellos \textit{tests} que se demoran más de 4 minutos bajo dicha cifra.
+
+
+\section*{Heurística y poda}
+\hspace{5mm}
+Finalmente, se experimentó con la inclusión de ambos métodos mencionados (heurística más poda), y se obtuvieron 
+los resultados mostrados en las tablas de la 13 a la 16. A partir de estos, es posible apreciar que se parecen bastante a los
+obtenidos por la poda sin heurística. Es por lo anterior que se concluye que la heurística implementada no aporta a este tipo
+de problema podados, es más, quizás no aporta con ningún otro tipo de poda, pero para afirmar esto habría que realizar más
+experimentos con distintas podas, e incluso con otras heurísticas afirmar su influencia en este tipo de problemas.
+Por otra parte, se destaca que la poda implementada, a pesar de ser una poda bastante simple y fácil de implementar, logró disminuir
+notoriamente tanto la cantidad de \textit{undo's} como los tiempos de ejecución para la mayoría de los \textit{tests}, por lo 
+que definitivamente la puedo considerar una poda importante que debe ser tomada en consideración al momento de implementar un
+algoritmo eficiente de \textit{backtracking} para problemas de este tipo.
+
+\section*{Anexos}
+
+\textit{* $\infty$: tiempo mayor a 4 minutos, y por ende la cantidad de undo's es demasiado grande} \\
+
+\begin{center}
+    \begin{table}[h]
+        \caption{"\textit{Naive} - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 01 al 09"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T01 & T02 & T03 & T04 & T05 & T06 & T07 & T08 & T09 \\
+            \hline
+            Tiempo & 0.018 & 0.019 & 0.019 & 0.019 & 0.018 & 0.019 & 0.021 & 0.098 & 0.029 \\
+            \textit{Undo's} & 2 & 3 & 12 & 10 & 2076 & 2055 & 23668 & 1161889 & 90052 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"\textit{Naive} - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 10 al 16"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T10 & T11 & T12 & T13 & T14 & T15 & T16 \\
+            \hline
+            Tiempo & 0.022 & 0.053 & 0.068 & 59.538 & $\infty$ & 30.975 & 7.140 \\
+            \textit{Undo's} & 41188 & 335115 & 522748 & 656154787 & $\infty$ & 342618420 & 91328418 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"\textit{Naive} - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 17 al 22"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T17 & T18 & T19 & T20 & T21 & T22 \\
+            \hline
+            Tiempo & 4.803 & 88.035 & 181.777 & 40.088 & 60.610 & $\infty$ \\
+            \textit{Undo's} & 43845763 & 981581294 & 1846291824 & 541580316 & 664125782 & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"\textit{Naive} - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T23 & T24 & T25 & T26 & T27 & T28 & T29 & T30 \\
+            \hline
+            Tiempo & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \textit{Undo's} & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Heurística - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 01 al 10"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T01 & T02 & T03 & T04 & T05 & T06 & T07 & T08 & T09 \\
+            \hline
+            Tiempo & 0.020 & 0.016 & 0.017 & 0.014 & 0.015 & 0.015 & 0.018 & 0.094 & 0.022 \\
+            \textit{Undo's} & 2 & 3 & 12 & 10 & 2076 & 2239 & 23668 & 1162033 & 90196 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Heurística - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 10 al 16"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T10 & T11 & T12 & T13 & T14 & T15 & T16 \\
+            \hline
+            Tiempo & 0.021 & 0.052 & 0.061 & 57.051 & $\infty$ & 96.125 & 1.109 \\
+            \textit{Undo's} & 41080 & 332979 & 522748 & 656184371 & $\infty$ & 1119926400 & 15559826 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Heurística - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 17 al 22"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T17 & T18 & T19 & T20 & T21 & T22 \\
+            \hline
+            Tiempo & 2.059 & 89.026 & 184.335 & $\infty$ & 61.122 & $\infty$ \\
+            \textit{Undo's} & 20115331 & 1846323196 & 1846291824 & $\infty$ & 664125782 & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Heurística - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T23 & T24 & T25 & T26 & T27 & T28 & T29 & T30 \\
+            \hline
+            Tiempo & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \textit{Undo's} & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 01 al 10"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T01 & T02 & T03 & T04 & T05 & T06 & T07 & T08 & T09 \\
+            \hline
+            Tiempo & 0.020 & 0.016 & 0.015 & 0.015 & 0.067 & 0.017 & 0.017 & 0.047 & 0.021 \\
+            \textit{Undo's} & 2 & 3 & 7 & 4 & 929 & 1237 & 7085 & 374209 & 39532 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 10 al 16"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T10 & T11 & T12 & T13 & T14 & T15 & T16 \\
+            \hline
+            Tiempo & 0.017 & 0.022 & 0.030 & 12.205 & $\infty$ & 20.413 & 2.994 \\
+            \textit{Undo's} & 23692 & 44685 & 121795 & 111814507 & $\infty$ & 196233133 & 30351649 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 17 al 22"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T17 & T18 & T19 & T20 & T21 & T22 \\
+            \hline
+            Tiempo & 1.730 & 34.099 & 57.233 & 11.959 & 22.398 & $\infty$ \\
+            \textit{Undo's} & 14526204 & 335870016 & 475741045 & 145816990 & 218709456 & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T23 & T24 & T25 & T26 & T27 & T28 & T29 & T30 \\
+            \hline
+            Tiempo & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \textit{Undo's} & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"H + Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T01 & T02 & T03 & T04 & T05 & T06 & T07 & T08 & T09 \\
+            \hline
+            Tiempo & 0.023 & 0.018 & 0.014 & 0.015 & 0.016 & 0.015 & 0.016 & 0.048 & 0.021 \\
+            \textit{Undo's} & 1 & 2 & 7 & 4 & 929 & 1343 & 7085 & 374293 & 39287 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"H + Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c |}
+            \hline
+            Test & T10 & T11 & T12 & T13 & T14 & T15 & T16 \\
+            \hline
+            Tiempo & 0.017 & 0.022 & 0.029 & 12.303 & $\infty$ & 34.566 & 0.452 \\
+            \textit{Undo's} & 23625 & 43932 & 121795 & 111824455 & $\infty$ & 496253133 & 5143753 \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"H + Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T17 & T18 & T19 & T20 & T21 & T22 \\
+            \hline
+            Tiempo & 0.827 & 37.157 & 59.652 & 11.959 & 22.398 & $\infty$ \\
+            \textit{Undo's} & 7180342 & 335869874 & 474414871 & 145816990 & 218709456 & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+    \begin{table}[h]
+        \caption{"H + Poda - Tiempos de ejecución (en segundos) vs \textit{undo's} de los tests 23 al 30"}
+        \centering
+        \begin{tabular} {| c | c | c | c | c | c | c | c | c | c | c | c | c | c | c |}
+            \hline
+            Variable & T23 & T24 & T25 & T26 & T27 & T28 & T29 & T30 \\
+            \hline
+            Tiempo & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \textit{Undo's} & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ \\
+            \hline
+        \end{tabular}
+    \end{table}
+\end{center}
+
+\end{document}
