@@ -1,4 +1,7 @@
 # IIC2133 - Estructuras de Datos y Algoritmos
+### Aclaración
+No es código mio, es el entregado por el material docente del curso en ese semestre
+
 ## 2019-1
 
 Bienvenido al sitio web del curso de Estructuras de Datos y Algoritmos. En esta página podrás encontrar la información administrativa del curso. En el repositorio podrás encontrar código ya preparado por tus ayudantes, junto con los eventuales enunciados de las tareas y las diapositivas de clases.
